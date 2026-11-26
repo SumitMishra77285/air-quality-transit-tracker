@@ -18,6 +18,12 @@ export interface PollutantReadings {
   o3: number | null;
 }
 
+export interface HourlyAqiPoint {
+  time: string;
+  usAqi: number | null;
+  pm25: number | null;
+}
+
 export interface AirQualityData {
   locationId: string;
   latitude: number;
@@ -25,6 +31,7 @@ export interface AirQualityData {
   usAqi: number | null;
   euAqi: number | null;
   pollutants: PollutantReadings;
+  hourly?: HourlyAqiPoint[];
   units: {
     pm25: string;
     pm10: string;
@@ -90,6 +97,7 @@ export interface AppSettings {
   transitlandApiKey: string;
   openaqApiKey: string;
   enableOfflineSw: boolean;
+  darkMode: boolean;
 }
 
 export interface ApiError {

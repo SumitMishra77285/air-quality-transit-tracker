@@ -1,8 +1,8 @@
-import type { AirQualityData, LocationPoint } from '../types';
+import type { AirQualityData, HourlyAqiPoint, LocationPoint } from '../types';
 import { readCache, writeCache } from '../utils/storage';
 import { fetchJson } from './client';
 
-const AIR_QUALITY_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const AIR_QUALITY_TTL_MS = 10 * 60 * 1000;
 
 interface OpenMeteoAirQualityResponse {
   latitude: number;
@@ -23,6 +23,11 @@ interface OpenMeteoAirQualityResponse {
     carbon_monoxide?: string;
     nitrogen_dioxide?: string;
     ozone?: string;
+  };
+  hourly?: {
+    time: string[];
+    us_aqi?: Array<number | null>;
+    pm2_5?: Array<number | null>;
   };
 }
 
@@ -60,7 +65,6 @@ export async function fetchAirQuality(
     }
   }
 
-  // Primary source: Open-Meteo Air Quality API (keyless, CORS-enabled, global coverage)
   const params = new URLSearchParams({
     latitude: location.latitude.toFixed(4),
     longitude: location.longitude.toFixed(4),
@@ -73,11 +77,19 @@ export async function fetchAirQuality(
       'nitrogen_dioxide',
       'ozone',
     ].join(','),
+    hourly: 'us_aqi,pm2_5',
+    forecast_days: '1',
     timezone: 'auto',
   });
 
   const url = `https://air-quality-api.open-meteo.com/v1/air-quality?${params.toString()}`;
   const raw = await fetchJson<OpenMeteoAirQualityResponse>(url);
+
+  const hourly: HourlyAqiPoint[] = (raw.hourly?.time ?? []).slice(0, 24).map((time, idx) => ({
+    time,
+    usAqi: raw.hourly?.us_aqi?.[idx] ?? null,
+    pm25: raw.hourly?.pm2_5?.[idx] ?? null,
+  }));
 
   const result: AirQualityData = {
     locationId: location.id,
@@ -92,6 +104,7 @@ export async function fetchAirQuality(
       no2: raw.current?.nitrogen_dioxide ?? null,
       o3: raw.current?.ozone ?? null,
     },
+    hourly,
     units: {
       pm25: raw.current_units?.pm2_5 ?? 'µg/m³',
       pm10: raw.current_units?.pm10 ?? 'µg/m³',
@@ -104,7 +117,6 @@ export async function fetchAirQuality(
     fromCache: false,
   };
 
-  // Optional enrichment from OpenAQ v3 ground-station network when API key is provided
   if (options.openaqApiKey?.trim()) {
     try {
       const stationData = await fetchOpenAqNearest(
@@ -123,7 +135,7 @@ export async function fetchAirQuality(
         result.provider = 'openaq';
       }
     } catch {
-      // Keep Open-Meteo reading if OpenAQ station lookup fails or has no nearby sensor
+      // Keep Open-Meteo reading
     }
   }
 

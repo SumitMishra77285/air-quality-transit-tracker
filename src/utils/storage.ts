@@ -21,6 +21,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   transitlandApiKey: '',
   openaqApiKey: '',
   enableOfflineSw: false,
+  darkMode: false,
 };
 
 export function readCache<T>(key: string): T | null {
@@ -50,7 +51,6 @@ export function writeCache<T>(key: string, data: T, ttlMs: number): void {
       JSON.stringify(envelope),
     );
   } catch {
-    // Evict expired or oldest cache entries if LocalStorage quota is exceeded
     evictCacheEntries();
     try {
       window.localStorage.setItem(
@@ -58,7 +58,7 @@ export function writeCache<T>(key: string, data: T, ttlMs: number): void {
         JSON.stringify(envelope),
       );
     } catch {
-      // Ignore if still full (e.g., private browsing quota = 0)
+      // Ignore if still full
     }
   }
 }
@@ -74,7 +74,7 @@ export function clearAllCache(): void {
     }
     keysToRemove.forEach((k) => window.localStorage.removeItem(k));
   } catch {
-    // Ignore storage access errors
+    // Ignore
   }
 }
 
@@ -114,7 +114,7 @@ function writeJson<T>(key: string, value: T): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Ignore quota / private mode errors
+    // Ignore
   }
 }
 
