@@ -19,6 +19,7 @@ import { storage } from '../utils/storage';
 
 interface AppState {
   activeLocation: LocationPoint;
+  selectedStopId: string | null;
   airQuality: AirQualityData | null;
   transit: TransitFeedResult | null;
   aqLoading: boolean;
@@ -33,6 +34,7 @@ interface AppState {
 
 type AppAction =
   | { type: 'SET_LOCATION'; payload: LocationPoint }
+  | { type: 'SELECT_STOP'; payload: string | null }
   | { type: 'AQ_REQUEST' }
   | { type: 'AQ_SUCCESS'; payload: AirQualityData }
   | { type: 'AQ_ERROR'; payload: string }
@@ -61,6 +63,7 @@ function createInitialState(): AppState {
 
   return {
     activeLocation: initialLocation,
+    selectedStopId: null,
     airQuality: null,
     transit: null,
     aqLoading: false,
@@ -85,9 +88,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         activeLocation: action.payload,
+        selectedStopId: null,
         searchHistory: nextHistory,
       };
     }
+    case 'SELECT_STOP':
+      return { ...state, selectedStopId: action.payload };
     case 'AQ_REQUEST':
       return { ...state, aqLoading: true, aqError: null };
     case 'AQ_SUCCESS':
@@ -132,6 +138,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 interface AppContextValue {
   state: AppState;
   selectLocation: (location: LocationPoint) => void;
+  selectStop: (stopId: string | null) => void;
   refreshData: (forceRefresh?: boolean) => Promise<void>;
   toggleFavoriteLocation: (location: LocationPoint) => void;
   toggleFavoriteRoute: (route: FavoriteRoute) => void;
@@ -153,7 +160,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         openaqApiKey: state.settings.openaqApiKey,
         forceRefresh,
       })
-        .then((data) => dispatch({ type: 'AQ_SUCCESS', payload: data }))
+        .then((data) => {
+          dispatch({ type: 'AQ_SUCCESS', payload: data });
+          const currentAqi =
+            state.settings.aqiStandard === 'eu' ? data.euAqi : data.usAqi;
+          if (
+            currentAqi !== null &&
+            state.settings.aqiAlertThreshold > 0 &&
+            currentAqi >= state.settings.aqiAlertThreshold &&
+            'Notification' in window &&
+            Notification.permission === 'granted'
+          ) {
+            new Notification(`Air Quality Alert: ${location.name}`, {
+              body: `Current AQI is ${String(Math.round(currentAqi))}, above your ${String(state.settings.aqiAlertThreshold)} threshold.`,
+            });
+          }
+        })
         .catch((err: unknown) => {
           const message =
             err instanceof Error ? err.message : 'Unable to load air quality data.';
@@ -175,6 +197,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await Promise.all([aqPromise, transitPromise]);
     },
     [
+      state.settings.aqiAlertThreshold,
+      state.settings.aqiStandard,
       state.settings.openaqApiKey,
       state.settings.transitRadiusMeters,
       state.settings.transitlandApiKey,
@@ -196,6 +220,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const selectLocation = useCallback((location: LocationPoint) => {
     dispatch({ type: 'SET_LOCATION', payload: location });
+  }, []);
+
+  const selectStop = useCallback((stopId: string | null) => {
+    dispatch({ type: 'SELECT_STOP', payload: stopId });
   }, []);
 
   const refreshData = useCallback(
@@ -226,6 +254,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         state,
         selectLocation,
+        selectStop,
         refreshData,
         toggleFavoriteLocation,
         toggleFavoriteRoute,

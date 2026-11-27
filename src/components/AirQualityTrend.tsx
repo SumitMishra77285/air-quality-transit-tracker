@@ -1,4 +1,4 @@
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Clock } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 function barColor(aqi: number | null): string {
@@ -16,14 +16,12 @@ export function AirQualityTrend() {
   if (points.length === 0) return null;
 
   const maxAqi = Math.max(100, ...points.map((p) => p.usAqi ?? 0));
-  const cleanest = points.reduce<{ time: string; usAqi: number } | null>(
-    (best, p) => {
-      if (p.usAqi === null) return best;
-      if (!best || p.usAqi < best.usAqi) return { time: p.time, usAqi: p.usAqi };
-      return best;
-    },
-    null,
-  );
+  const bestWindows = points
+    .filter((p): p is { time: string; usAqi: number; pm25: number | null } => p.usAqi !== null)
+    .sort((a, b) => a.usAqi - b.usAqi)
+    .slice(0, 3);
+
+  const cleanest = bestWindows[0];
 
   return (
     <section
@@ -34,7 +32,7 @@ export function AirQualityTrend() {
         <div className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-sky-700 dark:text-sky-400" aria-hidden="true" />
           <h2 id="aq-trend-heading" className="text-base font-semibold text-slate-900 dark:text-slate-100">
-            24-Hour US AQI Trend
+            24-Hour US AQI Trend &amp; Best Commute Windows
           </h2>
         </div>
         {cleanest && (
@@ -74,6 +72,25 @@ export function AirQualityTrend() {
         <span>{points[Math.floor(points.length / 2)]?.time.slice(11, 16) ?? '12:00'}</span>
         <span>{points[points.length - 1]?.time.slice(11, 16) ?? '23:00'}</span>
       </div>
+
+      {bestWindows.length > 0 && (
+        <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-700">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200">
+            <Clock className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+            Best Outdoor Commute Windows Today
+          </div>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {bestWindows.map((win) => (
+              <li
+                key={win.time}
+                className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+              >
+                {win.time.slice(11, 16)} • AQI {Math.round(win.usAqi)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

@@ -1,4 +1,5 @@
 export type AqiStandard = 'us' | 'eu';
+export type DistanceUnit = 'metric' | 'imperial';
 
 export interface LocationPoint {
   id: string;
@@ -92,6 +93,8 @@ export interface FavoriteRoute {
 
 export interface AppSettings {
   aqiStandard: AqiStandard;
+  distanceUnit: DistanceUnit;
+  aqiAlertThreshold: number;
   autoRefreshMinutes: number;
   transitRadiusMeters: number;
   transitlandApiKey: string;

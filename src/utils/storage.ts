@@ -22,6 +22,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   openaqApiKey: '',
   enableOfflineSw: false,
   darkMode: false,
+  distanceUnit: 'metric',
+  aqiAlertThreshold: 150,
 };
 
 export function readCache<T>(key: string): T | null {
