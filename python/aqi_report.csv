@@ -1,0 +1,6 @@
+city,us_aqi,category,pm2_5,pm10,avg_24h_aqi,min_24h_aqi,max_24h_aqi,cleanest_commute_window
+Chandigarh,191,Unhealthy,86.6,88.7,189.0,182,194,00:00 (AQI 182)
+Amritsar,230,Very Unhealthy,77.3,79.2,232.7,227,242,22:00 (AQI 227)
+New Delhi,210,Very Unhealthy,72.6,74.5,207.5,196,228,00:00 (AQI 196)
+London,65,Moderate,21.0,24.8,66.3,61,71,00:00 (AQI 61)
+Tokyo,165,Unhealthy,56.3,58.1,160.3,152,165,00:00 (AQI 152)

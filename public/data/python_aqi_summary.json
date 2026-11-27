@@ -1,0 +1,61 @@
+{
+  "generated_by": "python/aqi_report_generator.py",
+  "generated_at_utc": "2026-11-27T08:49:59.866220+00:00",
+  "cities": [
+    {
+      "city": "Chandigarh",
+      "us_aqi": 191,
+      "category": "Unhealthy",
+      "pm2_5": 86.6,
+      "pm10": 88.7,
+      "avg_24h_aqi": 189.0,
+      "min_24h_aqi": 182,
+      "max_24h_aqi": 194,
+      "cleanest_commute_window": "00:00 (AQI 182)"
+    },
+    {
+      "city": "Amritsar",
+      "us_aqi": 230,
+      "category": "Very Unhealthy",
+      "pm2_5": 77.3,
+      "pm10": 79.2,
+      "avg_24h_aqi": 232.7,
+      "min_24h_aqi": 227,
+      "max_24h_aqi": 242,
+      "cleanest_commute_window": "22:00 (AQI 227)"
+    },
+    {
+      "city": "New Delhi",
+      "us_aqi": 210,
+      "category": "Very Unhealthy",
+      "pm2_5": 72.6,
+      "pm10": 74.5,
+      "avg_24h_aqi": 207.5,
+      "min_24h_aqi": 196,
+      "max_24h_aqi": 228,
+      "cleanest_commute_window": "00:00 (AQI 196)"
+    },
+    {
+      "city": "London",
+      "us_aqi": 65,
+      "category": "Moderate",
+      "pm2_5": 21.0,
+      "pm10": 24.8,
+      "avg_24h_aqi": 66.3,
+      "min_24h_aqi": 61,
+      "max_24h_aqi": 71,
+      "cleanest_commute_window": "00:00 (AQI 61)"
+    },
+    {
+      "city": "Tokyo",
+      "us_aqi": 165,
+      "category": "Unhealthy",
+      "pm2_5": 56.3,
+      "pm10": 58.1,
+      "avg_24h_aqi": 160.3,
+      "min_24h_aqi": 152,
+      "max_24h_aqi": 165,
+      "cleanest_commute_window": "00:00 (AQI 152)"
+    }
+  ]
+}
